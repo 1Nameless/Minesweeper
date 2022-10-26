@@ -45,10 +45,12 @@ export class Minesweeper{
     }
 
 
-    switch(x, y){
 
-        if(this.grid[x][y].type === 0) this.grid[x][y].type = 1;
-        else this.grid[x][y].type = 0;
+    flag(x, y){
+
+        if(this.grid[x][y].flaged) this.grid[x][y].flaged = false;
+        else this.grid[x][y].flaged = true;
+
         this.updateMethod(this.grid);
 
     }

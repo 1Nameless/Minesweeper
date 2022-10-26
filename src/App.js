@@ -16,7 +16,7 @@ function App() {
 
 
   return(
-      <div>
+      <div onContextMenu={(e)=> e.preventDefault()}>
         <GameField />
           <button onClick={() => setVal(val + 1)}>
               Click me
