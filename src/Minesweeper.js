@@ -7,8 +7,8 @@ class Tile{
     isCovered
     type
     flaged
-    constructor(isCovered, type) {
-        this.isCovered = isCovered;
+    constructor(type) {
+        this.isCovered = true;
         this.type = type;
         this.flaged = false;
     }
@@ -57,5 +57,42 @@ export class Minesweeper{
 
 
 
+    generateField(){
+
+        let newField = new Array()
+
+        for (let i = 0; i < this.height; i++) {
+            (this.grid)[i] = new Array(this.width);
+        }
+
+
+        //set the bombs
+        let setBombs = 0;
+        while (setBombs < this.bombs){
+            let x = getRandomInt(this.width)
+            let y = getRandomInt(this.height)
+
+            if(this.grid[x][y].type !== null){
+                this.grid[x][y].type = 10;
+                setBombs++;
+            }
+
+        }
+
+        //calculate ajacent bombs for each tile //TODO
+
+
+    }
+
+
+
 
 }
+
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
+
+
