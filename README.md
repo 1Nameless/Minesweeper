@@ -1,2 +1,2 @@
-# A basic minesweeper clone for not
+# A basic minesweeper clone for now
 WIP
