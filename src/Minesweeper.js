@@ -31,16 +31,9 @@ export class Minesweeper{
 
         this.grid = new Array(this.height)
 
-        for (let i = 0; i < this.height; i++) {
-            (this.grid)[i] = new Array(this.width);
-        }
+        console.log("new minesweeper")
+        this.generateField();
 
-        //fill field initially with all 0
-        for (let i = 0; i < height; i++) {
-            for (let j = 0; j < width; j++) {
-                this.grid[i][j] = new Tile(true, 0);
-            }
-        }
 
     }
 
@@ -59,12 +52,17 @@ export class Minesweeper{
 
     generateField(){
 
-        let newField = new Array()
 
         for (let i = 0; i < this.height; i++) {
             (this.grid)[i] = new Array(this.width);
         }
 
+        //fill field initially with all 0
+        for (let i = 0; i < this.height; i++) {
+            for (let j = 0; j < this.width; j++) {
+                this.grid[i][j] = new Tile(0);
+            }
+        }
 
         //set the bombs
         let setBombs = 0;
@@ -79,9 +77,61 @@ export class Minesweeper{
 
         }
 
-        //calculate ajacent bombs for each tile //TODO
+        function isValidPos(x, y, width, height) {
+            if (x < 0 || y < 0 || x > width - 1 || y > height - 1)
+                return 0;
+            return 1;
+        }
+
+        //calculate ajacent bombs for each tile
+        for (let i = 0; i < this.height; i++) {
+            for (let j = 0; j < this.width; j++) {
+                if(this.grid[i][j].type === 10) continue;
+
+                let count = 0;
+                if (isValidPos(i-1, j-1, this.width, this.height))
+                    if(this.grid[i-1][j-1].type === 10) count++;
+
+                if (isValidPos(i - 1, j, this.width, this.height))
+                    if(this.grid[i-1][j].type === 10) count++;
+
+                if (isValidPos(i - 1, j+1, this.width, this.height))
+                    if(this.grid[i-1][j+1].type === 10) count++;
+
+                if (isValidPos(i, j-1, this.width, this.height))
+                    if(this.grid[i][j-1].type === 10) count++;
+
+                if (isValidPos(i, j+1, this.width, this.height))
+                    if(this.grid[i][j+1].type === 10) count++;
+
+                if (isValidPos(i+1, j-1, this.width, this.height))
+                    if(this.grid[i+1][j-1].type === 10) count++;
+
+                if (isValidPos(i+1, j, this.width, this.height))
+                    if(this.grid[i+1][j].type === 10) count++;
+
+                if (isValidPos(i+1, j+1, this.width, this.height))
+                    if(this.grid[i+1][j+1].type === 10) count++;
 
 
+                this.grid[i][j].type = count
+
+            }
+        }
+
+        console.log(this.grid)
+
+    }
+
+    openTile(x, y){
+        if(this.grid[x][y].type === 0){
+            this.grid[x][y].type = 1
+        }
+        else if(this.grid[x][y].type === 1){
+            this.grid[x][y].type = 0
+        }
+
+        this.updateMethod(this.grid);
     }
 
 

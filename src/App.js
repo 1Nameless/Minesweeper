@@ -6,11 +6,16 @@ import css from "./App.css"
 function App() {
 
 
+
+
   const [val, setVal] = useState(0);
 
   setInterval(function () {
       //setVal(val + 1);
   }, 1000);
+
+
+
 
 
 
