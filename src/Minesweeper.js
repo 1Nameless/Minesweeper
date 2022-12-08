@@ -6,11 +6,11 @@ import {GameField} from "./GameField";
 class Tile{
     isCovered
     type
-    flaged
+    flagged
     constructor(type) {
         this.isCovered = true;
         this.type = type;
-        this.flaged = false;
+        this.flagged = false;
     }
 }
 
@@ -40,6 +40,9 @@ export class Minesweeper{
 
 
     flag(x, y){
+
+        if(!this.grid[x][y].isCovered) return;
+
 
         if(this.grid[x][y].flaged) this.grid[x][y].flaged = false;
         else this.grid[x][y].flaged = true;
@@ -74,7 +77,6 @@ export class Minesweeper{
                 this.grid[x][y].type = 10;
                 setBombs++;
             }
-
         }
 
         function isValidPos(x, y, width, height) {
@@ -124,12 +126,38 @@ export class Minesweeper{
     }
 
     openTile(x, y){
-        if(this.grid[x][y].type === 0){
-            this.grid[x][y].type = 1
+
+        //already uncovered
+        if(!this.grid[x][y].isCovered) return;
+
+        //don't uncover flaged tiles
+        if(this.grid[x][y].flaged) return;
+
+
+        //uncover tile
+        this.grid[x][y].isCovered = false
+        this.updateMethod(this.grid);
+
+        //only continue when adjacent mine-count is zero
+        console.log(this.grid[x][y].value)
+        if(this.grid[x][y].type !== 0) return;
+
+        //uncover all ajacent tiles
+        for (let i = -1; i <= 1; i++) {
+            if(x + i < 0) continue
+            if(x + i >= this.width) break
+            for (let j = -1; j <= 1; j++) {
+                if(y + j < 0) continue
+                if(y + j >= this.height) break
+
+
+                //TODO what hapens if a field has 0 adjacent mines, but also a flag nect to it?
+
+                this.openTile(x+i, y+j)
+
+            }
         }
-        else if(this.grid[x][y].type === 1){
-            this.grid[x][y].type = 0
-        }
+
 
         this.updateMethod(this.grid);
     }

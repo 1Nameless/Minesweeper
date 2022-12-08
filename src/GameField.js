@@ -31,7 +31,7 @@ export class GameField extends Component{
         7: open7,
         8: open8,
         blank: blank,
-        flas: flag,
+        flag: flag,
     }
 
     constructor() {
@@ -49,7 +49,7 @@ export class GameField extends Component{
 
     height = 10;
     width = 10;
-    bombCount = 20;
+    bombCount = 10;
 
 
     game = new Minesweeper(this.height, this.width, this.bombCount, this.setField.bind(this))
@@ -79,27 +79,19 @@ export class GameField extends Component{
 
     getTile(val, x, y) {
 
+        let tileHeight;
+        let tileWidth = tileHeight = 30;
 
 
-
-        if(val.flaged){
-            return <img className={"tile"} src={flag} height={30} width={30} alt={""} onClick={() => {
-                //this.game.switch(x, y)
-            }
+        let img = null;
 
 
-            }
-            onContextMenu={
-                ()=>{
-                    this.game.flag(x, y)
-                }
+        if(val.flaged) img = this.ImgMap.flag;
+        else if(val.isCovered) img = this.ImgMap.blank;
+        else img = this.ImgMap[val.type];
 
-            }
 
-            />
-        }
-
-        return <img className={"tile"} src={this.ImgMap[val.type]} height={30} width={30} alt={""} onClick={() => {
+        return <img className={"tile"} src={img} height={tileHeight} width={tileWidth} alt={""} onClick={() => {
             this.game.openTile(x, y);
         }}
                     onContextMenu={
