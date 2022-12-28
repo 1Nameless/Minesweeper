@@ -96,7 +96,7 @@ export class GameField extends Component{
         }}
                     onContextMenu={
                         ()=>{
-                            this.game.flag(x, y)
+                            this.game.flag(x, y);
                         }
                     }
         />

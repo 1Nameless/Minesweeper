@@ -5,6 +5,7 @@ import {GameField} from "./GameField";
 
 class Tile{
     isCovered
+    //count of adjacent bombs. 10 means this field is a Bomb
     type
     flagged
     constructor(type) {
@@ -39,17 +40,7 @@ export class Minesweeper{
 
 
 
-    flag(x, y){
 
-        if(!this.grid[x][y].isCovered) return;
-
-
-        if(this.grid[x][y].flaged) this.grid[x][y].flaged = false;
-        else this.grid[x][y].flaged = true;
-
-        this.updateMethod(this.grid);
-
-    }
 
 
 
@@ -127,20 +118,20 @@ export class Minesweeper{
 
     openTile(x, y){
 
-        //already uncovered
-        if(!this.grid[x][y].isCovered) return;
-
         //don't uncover flaged tiles
         if(this.grid[x][y].flaged) return;
+
+        //already uncovered and unsatisfied
+        if(!this.grid[x][y].isCovered && !this.isSatisfied(x, y)) return;
 
 
         //uncover tile
         this.grid[x][y].isCovered = false
         this.updateMethod(this.grid);
+        //TODO watch out for mines
 
         //only continue when adjacent mine-count is zero
-        console.log(this.grid[x][y].value)
-        if(this.grid[x][y].type !== 0) return;
+        if(this.grid[x][y].type !== 0 && !this.isSatisfied(x, y)) return;
 
         //uncover all ajacent tiles
         for (let i = -1; i <= 1; i++) {
@@ -151,15 +142,54 @@ export class Minesweeper{
                 if(y + j >= this.height) break
 
 
-                //TODO what hapens if a field has 0 adjacent mines, but also a flag nect to it?
+                //TODO what hapens if a field has 0 adjacent mines, but also a flag next to it?
 
-                this.openTile(x+i, y+j)
+                if(this.grid[x+i][y+j].isCovered) this.openTile(x+i, y+j);
 
             }
         }
 
 
         this.updateMethod(this.grid);
+    }
+
+    flag(x, y){
+
+        if(!this.grid[x][y].isCovered) return;
+
+
+        if(this.grid[x][y].flaged) this.grid[x][y].flaged = false;
+        else this.grid[x][y].flaged = true;
+
+        this.updateMethod(this.grid);
+
+    }
+
+
+    isSatisfied(x, y){
+
+        // counts how many flags are adjacent
+        let flagCount = 0;
+
+
+        for (let i = -1; i <= 1; i++) {
+            if(x + i < 0) continue
+            if(x + i >= this.width) break
+            for (let j = -1; j <= 1; j++) {
+                if(y + j < 0) continue
+                if(y + j >= this.height) break
+
+                if(this.grid[x+i][y+j].flaged) flagCount++;
+
+
+            }
+        }
+
+
+
+
+        return this.grid[x][y].type === flagCount;
+
     }
 
 
