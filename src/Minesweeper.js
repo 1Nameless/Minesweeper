@@ -15,6 +15,12 @@ class Tile{
     }
 }
 
+export const WinState = Object.freeze({
+    ongoing: "ongoing",
+    won: "won",
+    lost: "lost",
+})
+
 
 export class Minesweeper{
 
@@ -23,6 +29,8 @@ export class Minesweeper{
     bombs
     updateMethod
     grid
+    flagCount
+    winstate
 
     constructor(height, width, bombs, updateMethode) {
         this.bombs = bombs;
@@ -30,7 +38,9 @@ export class Minesweeper{
         this.width = width;
         this.updateMethod = updateMethode;
 
-        this.grid = new Array(this.height)
+        this.flagCount = 0;
+        this.grid = new Array(this.height);
+        this.winstate = WinState.ongoing;
 
         console.log("new minesweeper")
         this.generateField();
@@ -39,83 +49,62 @@ export class Minesweeper{
     }
 
 
+    sendUpdate(){
+        this.updateMethod(this.grid, this.flagCount, this.winstate)
+    }
 
 
 
 
-
-    generateField(){
-
-
+    /**
+     * Generates a Minesweeper field with the specified number of bombs.
+     */
+    generateField() {
+        // Initialize the grid with empty tiles.
         for (let i = 0; i < this.height; i++) {
-            (this.grid)[i] = new Array(this.width);
-        }
-
-        //fill field initially with all 0
-        for (let i = 0; i < this.height; i++) {
+            this.grid[i] = new Array(this.width);
             for (let j = 0; j < this.width; j++) {
                 this.grid[i][j] = new Tile(0);
             }
         }
 
-        //set the bombs
+        // Set the bombs randomly on the grid.
         let setBombs = 0;
-        while (setBombs < this.bombs){
-            let x = getRandomInt(this.width)
-            let y = getRandomInt(this.height)
+        while (setBombs < this.bombs) {
+            let x = getRandomInt(this.width);
+            let y = getRandomInt(this.height);
 
-            if(this.grid[x][y].type !== null){
+            if (this.grid[x][y].type !== 10) {
                 this.grid[x][y].type = 10;
                 setBombs++;
             }
         }
 
-        function isValidPos(x, y, width, height) {
-            if (x < 0 || y < 0 || x > width - 1 || y > height - 1)
-                return 0;
-            return 1;
-        }
-
-        //calculate ajacent bombs for each tile
+        // Calculate the number of adjacent bombs for each tile.
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {
-                if(this.grid[i][j].type === 10) continue;
+                if (this.grid[i][j].type === 10) continue;
 
                 let count = 0;
-                if (isValidPos(i-1, j-1, this.width, this.height))
-                    if(this.grid[i-1][j-1].type === 10) count++;
-
-                if (isValidPos(i - 1, j, this.width, this.height))
-                    if(this.grid[i-1][j].type === 10) count++;
-
-                if (isValidPos(i - 1, j+1, this.width, this.height))
-                    if(this.grid[i-1][j+1].type === 10) count++;
-
-                if (isValidPos(i, j-1, this.width, this.height))
-                    if(this.grid[i][j-1].type === 10) count++;
-
-                if (isValidPos(i, j+1, this.width, this.height))
-                    if(this.grid[i][j+1].type === 10) count++;
-
-                if (isValidPos(i+1, j-1, this.width, this.height))
-                    if(this.grid[i+1][j-1].type === 10) count++;
-
-                if (isValidPos(i+1, j, this.width, this.height))
-                    if(this.grid[i+1][j].type === 10) count++;
-
-                if (isValidPos(i+1, j+1, this.width, this.height))
-                    if(this.grid[i+1][j+1].type === 10) count++;
-
-
-                this.grid[i][j].type = count
-
+                for (let dx = -1; dx <= 1; dx++) {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        if (dx === 0 && dy === 0) continue;
+                        if (i + dx < 0 || i + dx >= this.width) continue;
+                        if (j + dy < 0 || j + dy >= this.height) continue;
+                        if (this.grid[i + dx][j + dy].type === 10) count++;
+                    }
+                }
+                this.grid[i][j].type = count;
             }
         }
-
-        console.log(this.grid)
-
     }
 
+    /**
+     * Uncovers the specified tile and all adjacent tiles with zero adjacent mines.
+     *
+     * @param x The x-coordinate of the tile.
+     * @param y The y-coordinate of the tile.
+     */
     openTile(x, y){
 
         //don't uncover flaged tiles
@@ -126,8 +115,9 @@ export class Minesweeper{
 
 
         //uncover tile
-        this.grid[x][y].isCovered = false
-        this.updateMethod(this.grid);
+        this.grid[x][y].isCovered = false;
+        if(this.grid[x][y].type === 10) this.winstate = WinState.lost;
+        this.sendUpdate();
         //TODO watch out for mines
 
         //only continue when adjacent mine-count is zero
@@ -149,19 +139,42 @@ export class Minesweeper{
             }
         }
 
+        //set winstate to won if game is won
+        if(this.getNumberOfClosedTiles() === this.bombs) this.winstate = WinState.won;
 
-        this.updateMethod(this.grid);
+
+        this.sendUpdate();
     }
 
     flag(x, y){
 
         if(!this.grid[x][y].isCovered) return;
+        {
+            if(this.grid[x][y].flaged){
+                this.grid[x][y].flaged = false;
+                this.flagCount--;
+            }
+            else{
+                this.grid[x][y].flaged = true;
+                this.flagCount++;
+            }
 
+            this.sendUpdate();
 
-        if(this.grid[x][y].flaged) this.grid[x][y].flaged = false;
-        else this.grid[x][y].flaged = true;
+        }
 
-        this.updateMethod(this.grid);
+    }
+
+    getNumberOfClosedTiles() {
+
+        let count = 0;
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                if(this.grid[x][y].isCovered) count++;
+            }
+        }
+        return count
+
 
     }
 

@@ -12,7 +12,7 @@ import open6 from "./Resources/open6.gif"
 import open7 from "./Resources/open7.gif"
 import open8 from "./Resources/open8.gif"
 
-import { Minesweeper } from "./Minesweeper"
+import { Minesweeper, WinState } from "./Minesweeper"
 
 
 
@@ -38,18 +38,26 @@ export class GameField extends Component{
         super();
 
         this.state={
-            field: new Array(10)
+            field: new Array(10),
+            flagCount: 0,
+            winState: WinState.ongoing,
         }
 
     }
 
-    setField(newField){
-        this.setState({field:newField});
+    setField(newField, flagcount, winstate){
+        this.setState({
+            field:newField,
+            flagCount: flagcount,
+            winState: winstate,
+
+        });
     }
 
     height = 10;
     width = 10;
-    bombCount = 10;
+    bombCount = 20;
+
 
 
     game = new Minesweeper(this.height, this.width, this.bombCount, this.setField.bind(this))
@@ -57,6 +65,9 @@ export class GameField extends Component{
 
     render(){
         return (
+            <div>
+                <div>Mines left: {this.bombCount - this.state.flagCount}</div>
+                <div>{this.state.winState}</div>
             <table className={"grid"}>
                 <tbody>
                 {
@@ -70,11 +81,10 @@ export class GameField extends Component{
                 }
                 </tbody>
             </table>
+            </div>
 
         )
     }
-
-
 
 
     getTile(val, x, y) {
@@ -101,6 +111,8 @@ export class GameField extends Component{
                     }
         />
     }
+
+
 
 
 
